@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>kumho-agora</title>
+    <style>
+        /* 기본 라이트 모드 설정 */
+        :root {
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --border-color: #ddd;
+            --container-background: #f9f9f9;
+            --input-background: #ffffff;
+            --input-text-color: #000000;
+            --button-background: #007bff;
+            --button-text-color: #ffffff;
+            --button-border-color: #007bff;
+        }
+
+        /* 다크 모드 설정 */
+        [data-theme="dark"] {
+            --background-color: #121212; /* 다크 모드 배경색 */
+            --text-color: #ffffff; /* 다크 모드 텍스트 색 */
+            --border-color: #333333; /* 다크 모드 경계선 색 */
+            --container-background: #1e1e1e; /* 다크 모드 컨테이너 배경색 */
+            --input-background: #2c2c2c; /* 다크 모드 입력 필드 배경색 */
+            --input-text-color: #ffffff; /* 다크 모드 입력 필드 텍스트 색 */
+            --button-background: #333333; /* 다크 모드 버튼 배경색 */
+            --button-text-color: #ffffff; /* 다크 모드 버튼 텍스트 색 */
+            --button-border-color: #444444; /* 다크 모드 버튼 경계선 색 */
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 1rem;
+            line-height: 1.6;
+            background-color: var(--background-color); /* 배경색 */
+            color: var(--text-color); /* 텍스트 색 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: var(--container-background); /* 컨테이너 배경색 */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 800px;
+            box-sizing: border-box;
+            overflow-x: auto;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        textarea, input[type="text"], input[type="file"] {
+            width: 100%;
+            font-size: 1em;
+            background-color: var(--input-background); /* 입력 필드 배경색 */
+            color: var(--input-text-color); /* 입력 필드 텍스트 색 */
+            border: 1px solid var(--border-color); /* 경계선 색 */
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background: var(--container-background); /* 리스트 아이템 배경색 */
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid var(--border-color); /* 리스트 아이템 경계선 색 */
+        }
+
+        .warning {
+            font-size: 0.9em;
+            color: var(--text-color); /* 경고 텍스트 색 */
+        }
+
+        .mode-toggle, .filter-button {
+            margin-bottom: 20px;
+            background-color: var(--button-background); /* 버튼 배경색 */
+            color: var(--button-text-color); /* 버튼 텍스트 색 */
+            border: 1px solid var(--button-border-color); /* 버튼 경계선 색 */
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .btn {
+            margin: 5px;
+            padding: 10px;
+            background-color: var(--button-background); /* 버튼 배경색 */
+            color: var(--button-text-color); /* 버튼 텍스트 색 */
+            border: 1px solid var(--button-border-color); /* 버튼 경계선 색 */
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .btn:hover {
+            background-color: #007bff; /* hover 시 배경색 */
+            color: white;
+            border-color: #007bff;
+        }
+
+        .comment {
+            margin-top: 5px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            background-color: var(--container-background);
+        }
+
+        form {
+            margin-top: 10px;
+        }
+
+        input[type="text"] {
+            margin-bottom: 5px;
+            padding: 10px;
+        }
+
+        #verificationOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #verificationBox {
+            background-color: var(--container-background);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div id="verificationOverlay">
+        <div id="verificationBox">
+            <h2>사용자명 인증</h2>
+            <p> 디스코드 사용자명을 입력하세요 (예 ._peropero_.):</p>
+           <img src="./a.jpg" width="200px" alt="Verification Image">
+            <input type="text" id="verificationInput" placeholder="인증 값">
+            <button onclick="checkVerification()" class="btn">확인</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>서버 오류 제보 게시판</h1>
+        <p class="warning">서버에서 발생한 각종 오류을 제보하여 주세요.</p>
+        <p class="warning">디스코드 사용자명과 함께 첨부 부탁하여야 정상적으로 첨부 됩니다.</p>
+        <button class="mode-toggle" onclick="toggleMode()">모드 전환</button>
+        <!--<button class="filter-button" onclick="loadPosts()">모든 글 보기</button>!-->
+        <form id="postForm">
+            <label for="content">내용:</label>
+            <textarea id="content" name="content" required></textarea>
+            <label for="file">파일 업로드 (PNG, JPG, MP3, MP4):</label>
+            <input type="file" id="file" name="file" accept=".png, .mp3, .mp4">
+            <button type="submit" class="btn">글 작성</button>
+        </form>
+       
+        <hr>
+        <h2>작성된 글</h2>
+        <ul id="posts"></ul>
+    </div>
+
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+    <!-- Firebase Storage -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-storage.js"></script>
+
+    <script>
+        // Firebase 설정 객체
+        var firebaseConfig = {
+            apiKey: "peropero-d58a1.firebaseapp.com",
+            authDomain: "peropero-d58a1.firebaseapp.com",
+            databaseURL: "https://peropero-d58a1-default-rtdb.firebaseio.com",
+            projectId: "peropero-d58a1",
+            storageBucket: "peropero-d58a1.appspot.com",
+            messagingSenderId: "507483833368",
+            appId: "1:507483833368:web:342ce39bcfb6de1acfaf6d"
+        };
+        // Firebase 초기화
+        firebase.initializeApp(firebaseConfig);
+        var database = firebase.database();
+        var storage = firebase.storage();
+        var verifiedNickname = ''; // 인증된 닉네임을 저장할 변수
+
+        // 인증 확인 함수
+        function checkVerification() {
+            const verificationInput = document.getElementById('verificationInput').value;
+            const predeterminedValues = ['rhrnak99', '1admin', 'j3lligaetom', 'bagjunseong5241', '._peropero_.']; // 사전 제공된 값 목록
+
+            if (predeterminedValues.includes(verificationInput)) {
+                verifiedNickname = verificationInput;
+                document.getElementById('verificationOverlay').style.display = 'none';
+                loadPosts(); // 인증 성공 후 게시물 불러오기
+            } else {
+                alert('사용자명이 올바르지 않습니다.');
+            }
+        }
+
+        // 모드 전환 함수
+        function toggleMode() {
+            const currentTheme = document.documentElement.getAttribute("data-theme");
+            const newTheme = currentTheme === "dark" ? "light" : "dark";
+            document.documentElement.setAttribute("data-theme", newTheme);
+            localStorage.setItem("theme", newTheme);
+        }
+
+        // 페이지 로드 시 저장된 테마 적용
+        document.addEventListener("DOMContentLoaded", function () {
+            const savedTheme = localStorage.getItem("theme");
+            if (savedTheme) {
+                document.documentElement.setAttribute("data-theme", savedTheme);
+            }
+            // loadPosts(); // 페이지 로드 시 기존 게시물 불러오기는 인증 후에.
+        });
+
+        // 게시물 추가 함수
+        function addPost(nickname, content, fileUrl, fileType) {
+            const newPostKey = database.ref().child('posts').push().key;
+            database.ref('posts/' + newPostKey).set({
+                nickname: nickname,
+                content: content,
+                fileUrl: fileUrl || null,
+                fileType: fileType || null,
+                likes: 0,
+                dislikes: 0
+            });
+        }
+
+        // 게시물 작성 폼 제출 이벤트 리스너
+        document.getElementById('postForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const content = document.getElementById('content').value;
+            const file = document.getElementById('file').files[0];
+
+            if (file) {
+                const storageRef = storage.ref('uploads/' + file.name);
+                storageRef.put(file).then(function (snapshot) {
+                    snapshot.ref.getDownloadURL().then(function (downloadURL) {
+                        addPost(verifiedNickname, content, downloadURL, file.type);
+                        document.getElementById('postForm').reset();
+                    });
+                });
+            } else {
+                addPost(verifiedNickname, content, null, null);
+                document.getElementById('postForm').reset();
+            }
+        });
+
+        // 게시물 불러오기 함수
+        function loadPosts() {
+            const postsRef = database.ref('posts');
+            postsRef.on('value', function (snapshot) {
+                const postsList = document.getElementById('posts');
+                postsList.innerHTML = '';
+                snapshot.forEach(function (childSnapshot) {
+                    const postData = childSnapshot.val();
+                    postData.id = childSnapshot.key;
+                    displayPost(postData);
+                });
+            });
+        }
+/*
+        // 게시물 필터링 함수
+        function filterPosts() {
+            const postsRef = database.ref('posts').orderByChild('likes').startAt(5);
+            postsRef.once('value', function (snapshot) {
+                const postsList = document.getElementById('posts');
+                postsList.innerHTML = '';
+                snapshot.forEach(function (childSnapshot) {
+                    const postData = childSnapshot.val();
+                    postData.id = childSnapshot.key;
+                    displayPost(postData);
+                });
+            });
+        }*/
+
+        // 게시물 DOM에 표시하는 함수
+        function displayPost(postData) {
+            const postList = document.getElementById('posts');
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <strong>${postData.nickname}</strong>: ${postData.content}
+                ${generatePreview(postData.fileUrl, postData.fileType)}
+                <p>추천 수: ${postData.likes} | 비추천 수: ${postData.dislikes}</p>
+                <button onclick="likePost('${postData.id}', '${postData.nickname}')">추천</button>
+                <button onclick="dislikePost('${postData.id}', '${postData.nickname}')">비추천</button>
+                <h4>댓글</h4>
+                <ul id="comments-${postData.id}"></ul>
+                <form onsubmit="addComment('${postData.id}', this); return false;">
+                    <input type="text" name="commentNickname" placeholder="닉네임" required>
+                    <input type="text" name="commentContent" placeholder="댓글 입력" required>
+                    <button type="submit">댓글 작성</button>
+                </form>
+            `;
+            postList.prepend(li);
+            loadComments(postData.id);
+        }
+
+        // 댓글 저장 함수
+        function addComment(postId, form) {
+            const commentNickname = form.commentNickname.value;
+            const commentContent = form.commentContent.value;
+
+            if (commentNickname && commentContent) {
+                const newCommentKey = database.ref().child(`posts/${postId}/comments`).push().key;
+                database.ref(`posts/${postId}/comments/${newCommentKey}`).set({
+                    nickname: commentNickname,
+                    content: commentContent,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                form.commentNickname.value = '';
+                form.commentContent.value = '';
+            }
+            return false;
+        }
+
+        // 댓글 불러오기 함수
+        function loadComments(postId) {
+            const commentsRef = database.ref(`posts/${postId}/comments`);
+            commentsRef.on('value', function (snapshot) {
+                const commentsList = document.getElementById(`comments-${postId}`);
+                commentsList.innerHTML = '';
+
+                snapshot.forEach(function (childSnapshot) {
+                    const comment = childSnapshot.val();
+                    const li = document.createElement('li');
+                    li.classList.add('comment');
+                    li.innerHTML = `<strong>${comment.nickname}:</strong> ${comment.content}`;
+                    commentsList.appendChild(li);
+                });
+            });
+        }
+
+        // 미디어 미리보기 생성 함수
+        function generatePreview(fileUrl, fileType) {
+            if (!fileUrl) return '';
+            if (fileType.startsWith('image/')) {
+                return `<img src="${fileUrl}" style="max-width: 100%; height: auto;" alt="Image Preview">`;
+            } else if (fileType.startsWith('audio/')) {
+                return `<audio controls><source src="${fileUrl}" type="${fileType}">Your browser does not support the audio element.</audio>`;
+            } else if (fileType.startsWith('video/')) {
+                return `<video controls style="max-width: 100%; height: auto;"><source src="${fileUrl}" type="${fileType}">Your browser does not support the video element.</video>`;
+            }
+            return '';
+        }
+/*
+        // 추천 및 비추천 함수 (한 번만 누를 수 있게 구현)
+        function likePost(postId, nickname) {
+            const postRef = database.ref('posts/' + postId + '/likedUsers/' + nickname);
+            postRef.once('value', function (snapshot) {
+                if (!snapshot.exists()) {
+                    // 사용자가 이미 추천하지 않은 경우 추천 가능
+                    database.ref('posts/' + postId + '/likes').transaction(function (likes) {
+                        return (likes || 0) + 1;
+                    });
+                    postRef.set(true); // 사용자가 추천한 것으로 저장
+                } else {
+                    alert('이미 추천을 했습니다.');
+                }
+            });
+        }
+
+        function dislikePost(postId, nickname) {
+            const postRef = database.ref('posts/' + postId + '/dislikedUsers/' + nickname);
+            postRef.once('value', function (snapshot) {
+                if (!snapshot.exists()) {
+                    // 사용자가 이미 비추천하지 않은 경우 비추천 가능
+                    database.ref('posts/' + postId + '/dislikes').transaction(function (dislikes) {
+                        return (dislikes || 0) + 1;
+                    });
+                    postRef.set(true); // 사용자가 비추천한 것으로 저장
+                } else {
+                    alert('이미 비추천을 했습니다.');
+                }
+            });
+        }*/
+    </script>
+</body>
+</html>
